@@ -1,11 +1,12 @@
 {
   "name": "AI Use Case Portfolio Ontology",
-  "version": "0.1.0",
-  "description": "A minimal, machine-readable ontology for governing an AI use case portfolio. The ontology drives validation, governance gates, and triage.",
+  "version": "0.2.0",
+  "description": "A minimal, machine-readable ontology for governing an AI use case portfolio. The ontology drives validation, governance gates, triage, and shared data layer analysis.",
   "classes": [
     {"id": "AIUseCase", "label": "AI Use Case", "description": "A proposed or active application of AI to a business problem."},
     {"id": "BusinessOwner", "label": "Business Owner", "description": "The accountable person for the use case outcome."},
     {"id": "DataSource", "label": "Data Source", "description": "An approved system or dataset the use case may read."},
+    {"id": "Entity", "label": "Data Entity", "description": "A business object such as customer, account, or document. Entities are what a shared data layer provides."},
     {"id": "RiskTier", "label": "Risk Tier", "description": "A four-level risk classification from low to critical."},
     {"id": "Control", "label": "Control", "description": "A governance control such as human-in-the-loop or monitoring."},
     {"id": "Bucket", "label": "Triage Bucket", "description": "The portfolio decision: Now, Next, Later, or Hold."}
@@ -13,6 +14,8 @@
   "properties": [
     {"id": "hasBusinessOwner", "domain": "AIUseCase", "range": "BusinessOwner", "required": true},
     {"id": "readsFrom", "domain": "AIUseCase", "range": "DataSource", "required": true},
+    {"id": "requiresEntity", "domain": "AIUseCase", "range": "Entity", "required": false},
+    {"id": "providesEntity", "domain": "DataSource", "range": "Entity", "required": false},
     {"id": "hasRiskTier", "domain": "AIUseCase", "range": "RiskTier", "required": true},
     {"id": "hasControl", "domain": "AIUseCase", "range": "Control", "required": false},
     {"id": "assignedToBucket", "domain": "AIUseCase", "range": "Bucket", "required": true}
@@ -41,5 +44,27 @@
     "document_management",
     "public_data"
   ],
+  "entities": [
+    "customer",
+    "account",
+    "transaction",
+    "document",
+    "policy",
+    "regulatory_change",
+    "call_transcript",
+    "interaction",
+    "credit_memo",
+    "vendor_contract",
+    "action_item"
+  ],
+  "data_source_entities": {
+    "core_banking": ["customer", "account", "transaction"],
+    "crm": ["customer", "interaction"],
+    "policy_repository": ["policy", "regulatory_change"],
+    "call_transcripts": ["call_transcript", "customer", "interaction"],
+    "document_management": ["document", "vendor_contract"],
+    "public_data": ["regulatory_change"],
+    "loan_documents": ["credit_memo", "document", "customer"]
+  },
   "buckets": ["Now", "Next", "Later", "Hold"]
 }

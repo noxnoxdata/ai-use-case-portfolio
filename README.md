@@ -2,7 +2,7 @@
 
 Turns a flat list of AI ideas into a governed portfolio.
 
-A small, dependency-free Python tool that applies a lightweight ontology and explicit governance gates to a set of AI use cases, then triages them into **Now / Next / Later / Hold**.
+A small, dependency-free Python tool that applies a lightweight ontology and explicit governance gates to a set of AI use cases, then triages them into **Now / Next / Later / Hold** and finds the shared data foundation across them.
 
 The scoring formula is deliberately simple. The value is the pattern: **a shared ontology plus governance gates turns a spreadsheet of ideas into a portfolio you can defend.**
 
@@ -23,13 +23,14 @@ This tool is the smallest useful demonstration of the fix: **define the domain o
 
 ## What it does
 
-1. Loads a machine-readable ontology (classes, properties, risk tiers, governance gates, approved data sources).
+1. Loads a machine-readable ontology (classes, properties, risk tiers, governance gates, approved data sources, and a source-to-entity map).
 2. Validates each use case against it.
 3. Applies governance gates: high-risk use cases must have a named owner, a human-in-the-loop control, and a monitoring plan; every use case must use an approved data source.
-4. Computes a weighted priority score from value, data readiness, feasibility, risk, and effort.
+4. Computes a weighted priority score and prints the breakdown, so the number is explainable rather than opaque.
 5. Triages each use case into **Now**, **Next**, **Later**, or **Hold**.
-6. Emits a Markdown report and a single-file HTML dashboard.
-7. Optionally asks a **local** LLM (Ollama) for a one-line rationale per use case. Local only, no data leaves the machine.
+6. Finds the **shared data layer**: entity reuse across use cases, plus a greedy cover that recommends the smallest set of entities reaching the most use cases.
+7. Emits a Markdown report and a single-file HTML dashboard.
+8. Optionally asks a **local** LLM (Ollama) for a one-line rationale per use case. Local only, no data leaves the machine.
 
 ---
 
@@ -54,6 +55,9 @@ flowchart LR
     X --> D
     L --> D
     H --> D
+    T --> SL[Shared data layer<br/>entity reuse + greedy cover]
+    SL --> R
+    SL --> D
     R -.optional.-> LLM[Local LLM rationale<br/>Ollama, localhost]
     LLM -.-> R
 ```
@@ -85,6 +89,21 @@ Buckets:
 - **Next**: score at least 55, no governance gaps.
 - **Later**: everything else with no gaps.
 - **Hold**: any governance gap. A high score cannot rescue a missing owner, a missing control, or an unapproved data source.
+
+---
+
+## The shared data layer
+
+Triage tells you what to do first. The shared layer tells you what to build once.
+
+Each use case declares the entities it needs (customer, account, document, policy, and so on). The ontology maps each data source to the entities it provides. The analyser then:
+
+1. Counts entity reuse across the portfolio: how many use cases need each entity.
+2. Flags shared entities, meaning any entity needed by two or more use cases.
+3. Runs a greedy cover: repeatedly pick the entity that covers the most uncovered use cases.
+4. Reports coverage and any use cases left outside the layer.
+
+The output is a short list of entities and sources that can serve most of the portfolio, so the organisation builds one foundation instead of twelve. In the sample, `customer` appears in seven of twelve use cases, and the cover (`customer`, `policy`, `document`, `call_transcript`) reaches the whole portfolio.
 
 ---
 
@@ -146,6 +165,18 @@ After running, open `output/portfolio.html` for the dashboard, or `output/portfo
 - Add portfolio-level views (risk concentration, value by business unit).
 - Export to a governance register (AI inventory) format.
 - Add an embeddings-based similarity check to spot duplicate use cases.
+
+---
+
+## Copilot skill
+
+`skills/ai-use-case-portfolio/SKILL.md` packages the same method as a portable skill. It works in Copilot, in an agent, or as an opencode skill. It covers validation, governance gates, scoring, triage, and the shared-layer analysis, with the output format and the honesty rules.
+
+---
+
+## Decks
+
+`deck/ai-use-case-portfolio-A.pptx` is the portfolio and recruiter deck. `deck/ai-use-case-portfolio-C.pptx` is the technical walkthrough. Both are committed with PDF versions for viewing.
 
 ---
 

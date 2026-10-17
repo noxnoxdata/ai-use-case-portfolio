@@ -4,7 +4,13 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from analyzer import UseCase, compute_score, assign_bucket  # noqa: E402
+from analyzer import (  # noqa: E402
+    UseCase,
+    assign_bucket,
+    compute_score,
+    score_breakdown,
+    shared_layer_analysis,
+)
 
 
 class ScoringTests(unittest.TestCase):
@@ -53,6 +59,22 @@ class ScoringTests(unittest.TestCase):
         uc.score = compute_score(uc)
         uc.bucket = assign_bucket(uc)
         self.assertEqual(uc.bucket, "Hold")
+
+    def test_score_breakdown_sums_to_score(self):
+        uc = self.make()
+        bd = score_breakdown(uc)
+        self.assertAlmostEqual(round(sum(bd.values()), 1), compute_score(uc), places=1)
+        self.assertIn("value", bd)
+        self.assertIn("effort", bd)
+
+    def test_shared_entity_detected_across_cases(self):
+        a = self.make(id="a", required_entities=["customer", "document"])
+        b = self.make(id="b", required_entities=["customer", "policy"])
+        c = self.make(id="c", required_entities=["transaction"])
+        shared = shared_layer_analysis([a, b, c], {})
+        self.assertEqual(len(shared["entity_to_cases"]["customer"]), 2)
+        self.assertGreater(len(shared["chosen"]), 0)
+        self.assertGreaterEqual(shared["coverage"], 0.0)
 
 
 if __name__ == "__main__":

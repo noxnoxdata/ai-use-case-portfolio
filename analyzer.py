@@ -4,10 +4,12 @@ AI Use Case Portfolio Analyzer
 ==============================
 
 A small, dependency-free tool that applies a lightweight ontology and governance
-gates to a portfolio of AI use cases, then triages them into Now / Next / Later / Hold.
+gates to a portfolio of AI use cases, then triages them into Now / Next / Later / Hold
+and finds the shared data foundation across them.
 
 The point is not the scoring formula. The point is the pattern: a shared ontology
-plus explicit governance gates turns a flat list of ideas into a governed portfolio.
+plus explicit governance gates plus entity reuse turns a flat list of ideas into a
+governed portfolio built on one foundation.
 
 Usage:
     python3 analyzer.py                 # generate the report from the sample data
@@ -26,6 +28,7 @@ import json
 import os
 import urllib.error
 import urllib.request
+from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -73,6 +76,7 @@ class UseCase:
     effort_weeks: float
     human_in_loop: bool
     monitoring: bool
+    required_entities: list[str] = field(default_factory=list)
     score: float = 0.0
     bucket: str = ""
     flags: list[str] = field(default_factory=list)
@@ -98,22 +102,26 @@ class UseCase:
         return gaps
 
 
+def score_breakdown(uc: UseCase) -> dict[str, float]:
+    """The points each factor contributes. Transparent by design."""
+    value = max(0.0, min(uc.value, 5.0)) / 5.0 * 40.0
+    readiness = max(0.0, min(uc.data_readiness, 5.0)) / 5.0 * 25.0
+    feasibility = max(0.0, min(uc.feasibility, 5.0)) / 5.0 * 20.0
+    risk_tier = max(1, min(uc.risk_tier, 4))
+    risk = (5 - risk_tier) / 4.0 * 15.0
+    effort = -min(max(uc.effort_weeks, 0.0), 52.0) / 52.0 * 10.0
+    return {
+        "value": round(value, 1),
+        "readiness": round(readiness, 1),
+        "feasibility": round(feasibility, 1),
+        "risk": round(risk, 1),
+        "effort": round(effort, 1),
+    }
+
+
 def compute_score(uc: UseCase) -> float:
     """Weighted 0-100 priority score. Higher is better."""
-    value = max(0.0, min(uc.value, 5.0)) / 5.0
-    readiness = max(0.0, min(uc.data_readiness, 5.0)) / 5.0
-    feasibility = max(0.0, min(uc.feasibility, 5.0)) / 5.0
-    risk = max(1, min(uc.risk_tier, 4))
-    risk_component = (5 - risk) / 4.0
-    effort_penalty = min(max(uc.effort_weeks, 0.0), 52.0) / 52.0
-
-    raw = (
-        value * 40.0
-        + readiness * 25.0
-        + feasibility * 20.0
-        + risk_component * 15.0
-        - effort_penalty * 10.0
-    )
+    raw = sum(score_breakdown(uc).values())
     return round(max(0.0, min(raw, 100.0)), 1)
 
 
@@ -127,17 +135,33 @@ def assign_bucket(uc: UseCase) -> str:
     return "Later"
 
 
-def load_use_cases(path: Path, approved_sources: set[str]) -> list[UseCase]:
+def load_use_cases(
+    path: Path,
+    approved_sources: set[str],
+    source_entities: dict[str, list[str]] | None = None,
+) -> list[UseCase]:
+    source_entities = source_entities or {}
     cases: list[UseCase] = []
     with path.open(newline="", encoding="utf-8") as fh:
         for row in csv.DictReader(fh):
+            data_sources = [s.strip() for s in row.get("data_sources", "").split(";") if s.strip()]
+            explicit = [e.strip() for e in row.get("required_entities", "").split(";") if e.strip()]
+            if explicit:
+                required = explicit
+            else:
+                derived: list[str] = []
+                for source in data_sources:
+                    for entity in source_entities.get(source, []):
+                        if entity not in derived:
+                            derived.append(entity)
+                required = derived
             uc = UseCase(
                 id=row.get("id", "").strip(),
                 name=row.get("name", "").strip(),
                 description=row.get("description", "").strip(),
                 business_unit=row.get("business_unit", "").strip(),
                 owner=row.get("owner", "").strip(),
-                data_sources=[s.strip() for s in row.get("data_sources", "").split(";") if s.strip()],
+                data_sources=data_sources,
                 ai_type=row.get("ai_type", "").strip(),
                 risk_tier=int(parse_float(row.get("risk_tier", "1"), 1)),
                 value=parse_float(row.get("value", "0")),
@@ -146,6 +170,7 @@ def load_use_cases(path: Path, approved_sources: set[str]) -> list[UseCase]:
                 effort_weeks=parse_float(row.get("effort_weeks", "0")),
                 human_in_loop=parse_bool(row.get("human_in_loop", "")),
                 monitoring=parse_bool(row.get("monitoring", "")),
+                required_entities=required,
             )
             uc.flags = uc.governance_gaps(approved_sources)
             uc.score = compute_score(uc)
@@ -153,6 +178,49 @@ def load_use_cases(path: Path, approved_sources: set[str]) -> list[UseCase]:
             cases.append(uc)
     cases.sort(key=lambda c: c.score, reverse=True)
     return cases
+
+
+def shared_layer_analysis(cases: list[UseCase], ontology: dict[str, Any]) -> dict[str, Any]:
+    """Find entities reused across use cases and recommend a shared data foundation.
+
+    Two views: entity reuse (what is common) and a greedy cover (the smallest set
+    of entities that reaches the most use cases).
+    """
+    entity_to_cases: dict[str, set[str]] = defaultdict(set)
+    for c in cases:
+        for entity in c.required_entities:
+            entity_to_cases[entity].add(c.id)
+
+    total = len(cases)
+    ranked = sorted(entity_to_cases.items(), key=lambda kv: (-len(kv[1]), kv[0]))
+
+    uncovered = {c.id for c in cases}
+    chosen: list[dict[str, Any]] = []
+    while uncovered:
+        best_entity: str | None = None
+        best_gain: set[str] = set()
+        for entity, ids in entity_to_cases.items():
+            gain = ids & uncovered
+            if len(gain) > len(best_gain):
+                best_entity, best_gain = entity, gain
+        if best_entity is None or not best_gain:
+            break
+        chosen.append({
+            "entity": best_entity,
+            "adds": len(best_gain),
+            "total": len(entity_to_cases[best_entity]),
+        })
+        uncovered -= best_gain
+
+    coverage = (total - len(uncovered)) / total * 100.0 if total else 0.0
+    return {
+        "entity_to_cases": entity_to_cases,
+        "ranked": ranked,
+        "chosen": chosen,
+        "uncovered": sorted(uncovered),
+        "coverage": round(coverage, 1),
+        "total": total,
+    }
 
 
 # --------------------------------------------------------------------------- #
@@ -212,6 +280,29 @@ def build_markdown(cases: list[UseCase], ontology: dict[str, Any], llm_used: boo
         )
     lines.append("")
 
+    shared = shared_layer_analysis(cases, ontology)
+    lines.append("## Shared data layer\n")
+    lines.append(
+        f"Entity reuse across {shared['total']} use cases. A shared entity is needed by "
+        "two or more use cases.\n"
+    )
+    lines.append("| Entity | Use cases | Coverage |")
+    lines.append("|---|---|---|")
+    for entity, ids in shared["ranked"]:
+        pct = round(len(ids) / shared["total"] * 100) if shared["total"] else 0
+        lines.append(f"| {entity} | {len(ids)} | {pct}% |")
+    lines.append("")
+    lines.append("**Recommended shared layer (greedy cover):**\n")
+    for item in shared["chosen"]:
+        lines.append(
+            f"- {item['entity']} (adds {item['adds']} use cases, used by {item['total']} in total)"
+        )
+    lines.append("")
+    lines.append(f"**Coverage:** {shared['coverage']}% of use cases can run on this shared layer.")
+    if shared["uncovered"]:
+        lines.append(f"**Not covered:** {', '.join(shared['uncovered'])}")
+    lines.append("")
+
     gaps = [c for c in cases if c.flags]
     if gaps:
         lines.append("## Governance gaps (held)\n")
@@ -225,13 +316,19 @@ def build_markdown(cases: list[UseCase], ontology: dict[str, Any], llm_used: boo
             continue
         lines.append(f"## {b}\n")
         for c in items:
+            bd = score_breakdown(c)
             lines.append(f"### {c.name}\n")
             lines.append(f"- Business unit: {c.business_unit}")
             lines.append(f"- Owner: {c.owner}")
             lines.append(f"- AI type: {c.ai_type}")
             lines.append(f"- Risk tier: {c.risk_tier}/4")
             lines.append(f"- Data sources: {', '.join(c.data_sources) or 'none'}")
+            lines.append(f"- Required entities: {', '.join(c.required_entities) or 'none'}")
             lines.append(f"- Score: {c.score}/100")
+            lines.append(
+                f"- Score breakdown: value {bd['value']}, readiness {bd['readiness']}, "
+                f"feasibility {bd['feasibility']}, risk {bd['risk']}, effort {bd['effort']}"
+            )
             if c.flags:
                 lines.append(f"- Governance gaps: {'; '.join(c.flags)}")
             if llm_used and c.rationale:
@@ -253,6 +350,15 @@ body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,
 header.top { background:var(--navy); color:#fff; padding:28px 32px; }
 header.top h1 { margin:0 0 6px; font-size:24px; letter-spacing:.2px; }
 header.top p { margin:0; color:var(--ice); font-size:14px; }
+.shared { margin:24px 32px 0; background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:18px 20px; }
+.shared h2 { font-size:15px; text-transform:uppercase; letter-spacing:.8px; color:var(--navy); margin:0 0 4px; }
+.shared .lead { font-size:13px; color:var(--muted); margin:0 0 12px; }
+.ents { display:grid; grid-template-columns:repeat(2,1fr); gap:8px 28px; }
+.ent { display:grid; grid-template-columns:130px 1fr 32px; align-items:center; gap:10px; font-size:12.5px; }
+.ent .bar { background:#eef2f7; border-radius:999px; height:8px; overflow:hidden; }
+.ent .bar i { display:block; height:100%; background:var(--teal); }
+.ent b { color:var(--navy); text-align:right; }
+.cover { font-size:12.5px; color:#374151; margin:12px 0 0; }
 .board { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; padding:24px 32px 40px; align-items:start; }
 .col header { display:flex; justify-content:space-between; align-items:baseline; margin:0 0 10px; }
 .col h2 { font-size:15px; text-transform:uppercase; letter-spacing:.8px; color:var(--navy); margin:0; }
@@ -266,11 +372,12 @@ header.top p { margin:0; color:var(--ice); font-size:14px; }
 .card h3 { font-size:14px; margin:8px 0 4px; }
 .meta { font-size:12px; color:var(--muted); margin:0 0 6px; }
 .desc { font-size:12.5px; color:#374151; margin:0 0 6px; }
+.breakdown { font-size:11.5px; color:var(--muted); margin:4px 0 0; }
 .gaps { font-size:12px; color:#991b1b; background:#fef2f2; border-radius:6px; padding:6px 8px; margin:6px 0 0; }
 .rationale { font-size:12px; color:#374151; font-style:italic; margin:6px 0 0; }
 .empty { color:var(--muted); font-size:13px; }
 footer { padding:0 32px 32px; color:var(--muted); font-size:12px; }
-@media (max-width:1100px) { .board { grid-template-columns:repeat(2,1fr); } }
+@media (max-width:1100px) { .board { grid-template-columns:repeat(2,1fr); } .ents { grid-template-columns:1fr; } }
 @media (max-width:640px) { .board { grid-template-columns:1fr; } }
 </style>
 </head>
@@ -279,6 +386,7 @@ footer { padding:0 32px 32px; color:var(--muted); font-size:12px; }
   <h1>AI Use Case Portfolio</h1>
   <p>@@SUBTITLE@@</p>
 </header>
+@@SHARED@@
 <div class="board">
 @@COLUMNS@@
 </div>
@@ -289,6 +397,23 @@ footer { padding:0 32px 32px; color:var(--muted); font-size:12px; }
 
 def build_html(cases: list[UseCase], ontology: dict[str, Any], llm_used: bool) -> str:
     counts = {b: sum(1 for c in cases if c.bucket == b) for b in BUCKETS}
+    shared = shared_layer_analysis(cases, ontology)
+
+    ent_rows = ""
+    for entity, ids in shared["ranked"][:8]:
+        pct = round(len(ids) / shared["total"] * 100) if shared["total"] else 0
+        ent_rows += (
+            f"<div class='ent'><span>{entity}</span>"
+            f"<span class='bar'><i style='width:{pct}%'></i></span>"
+            f"<b>{len(ids)}</b></div>"
+        )
+    chosen = ", ".join(item["entity"] for item in shared["chosen"])
+    shared_html = (
+        f"<section class='shared'><h2>Shared data layer</h2>"
+        f"<p class='lead'>{shared['coverage']}% of use cases can run on one shared foundation.</p>"
+        f"<div class='ents'>{ent_rows}</div>"
+        f"<p class='cover'>Recommended layer: {chosen}</p></section>"
+    )
 
     def card(c: UseCase) -> str:
         gap = ""
@@ -297,6 +422,12 @@ def build_html(cases: list[UseCase], ontology: dict[str, Any], llm_used: bool) -
         rationale = ""
         if llm_used and c.rationale:
             rationale = f"<p class='rationale'>{c.rationale}</p>"
+        bd = score_breakdown(c)
+        breakdown = (
+            f"<p class='breakdown'>value {bd['value']} &middot; readiness {bd['readiness']} "
+            f"&middot; feasibility {bd['feasibility']} &middot; risk {bd['risk']} "
+            f"&middot; effort {bd['effort']}</p>"
+        )
         return (
             f"<article class='card'>"
             f"<div class='card-top'>"
@@ -306,7 +437,7 @@ def build_html(cases: list[UseCase], ontology: dict[str, Any], llm_used: bool) -
             f"<h3>{c.name}</h3>"
             f"<p class='meta'>{c.business_unit} &middot; {c.ai_type}</p>"
             f"<p class='desc'>{c.description}</p>"
-            f"{gap}{rationale}"
+            f"{breakdown}{gap}{rationale}"
             f"</article>"
         )
 
@@ -320,7 +451,11 @@ def build_html(cases: list[UseCase], ontology: dict[str, Any], llm_used: bool) -
         )
 
     subtitle = f"{ontology['name']} v{ontology['version']} &middot; triaged into Now / Next / Later / Hold"
-    return HTML_TEMPLATE.replace("@@COLUMNS@@", columns).replace("@@SUBTITLE@@", subtitle)
+    return (
+        HTML_TEMPLATE.replace("@@SHARED@@", shared_html)
+        .replace("@@COLUMNS@@", columns)
+        .replace("@@SUBTITLE@@", subtitle)
+    )
 
 
 # --------------------------------------------------------------------------- #
@@ -339,7 +474,8 @@ def main(argv: list[str] | None = None) -> int:
 
     ontology = load_ontology(Path(args.ontology))
     approved = set(ontology.get("approved_data_sources", []))
-    cases = load_use_cases(Path(args.csv), approved)
+    source_entities = ontology.get("data_source_entities", {})
+    cases = load_use_cases(Path(args.csv), approved, source_entities)
 
     if args.llm:
         for c in cases:
@@ -351,10 +487,12 @@ def main(argv: list[str] | None = None) -> int:
     (out / "portfolio.html").write_text(build_html(cases, ontology, args.llm), encoding="utf-8")
 
     counts = {b: sum(1 for c in cases if c.bucket == b) for b in BUCKETS}
+    shared = shared_layer_analysis(cases, ontology)
     print("AI Use Case Portfolio Analyzer")
     print(f"  use cases: {len(cases)}")
     for b in BUCKETS:
         print(f"  {b}: {counts[b]}")
+    print(f"  shared layer coverage: {shared['coverage']}%")
     print(f"  wrote {out / 'portfolio-report.md'}")
     print(f"  wrote {out / 'portfolio.html'}")
     return 0
