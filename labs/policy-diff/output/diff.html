@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Policy Change Diff</title>
+<style>
+:root { --navy:#0F1E46; --ice:#CADCFC; --teal:#0E8A7D; --amber:#F2A900; --paper:#f7f9fc; --ink:#111827; --muted:#6b7280; --green:#2F6B3C; --red:#C0392B; }
+* { box-sizing:border-box; }
+body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; background:var(--paper); color:var(--ink); }
+header.top { background:var(--navy); color:#fff; padding:28px 32px; }
+header.top h1 { margin:0 0 6px; font-size:24px; }
+header.top p { margin:0; color:var(--ice); font-size:14px; }
+main { padding:24px 32px 40px; }
+.summary { display:flex; gap:12px; margin-bottom:18px; flex-wrap:wrap; }
+.pill { padding:6px 12px; border-radius:999px; font-size:12px; font-weight:600; background:#eef2f7; color:var(--navy); }
+.row { display:grid; grid-template-columns:110px 1fr 1fr; gap:0; border:1px solid #e5e7eb; border-radius:10px; margin-bottom:10px; overflow:hidden; background:#fff; }
+.status { padding:14px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:#fff; display:flex; align-items:center; }
+.added .status { background:var(--green); }
+.removed .status { background:var(--red); }
+.changed .status { background:var(--amber); color:var(--navy); }
+.unchanged .status { background:#94a3b8; }
+.cell { padding:14px; font-size:13px; line-height:1.45; border-left:1px solid #eef2f7; }
+.cell h4 { margin:0 0 4px; font-size:10px; text-transform:uppercase; letter-spacing:.6px; color:var(--muted); }
+.note { grid-column:2 / -1; padding:0 14px 12px; font-size:12px; color:var(--muted); font-style:italic; }
+@media (max-width:900px) { .row { grid-template-columns:1fr; } .cell { border-left:0; border-top:1px solid #eef2f7; } .note { grid-column:1; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>Policy Change Diff</h1>
+  <p>embeddings (nomic-embed-text)</p>
+</header>
+<main>
+  <div class="summary"><span class='pill'>Added: 1</span><span class='pill'>Removed: 1</span><span class='pill'>Changed: 5</span><span class='pill'>Unchanged: 3</span></div>
+  <div class='row changed'><div class='status'>changed</div><div class='cell'><h4>Version 1</h4>1. Purpose. This policy sets the minimum requirements for using AI tools in the bank.</div><div class='cell'><h4>Version 2</h4>1. Purpose. This policy sets the minimum requirements for using AI tools across the group.</div></div><div class='row unchanged'><div class='status'>unchanged</div><div class='cell'><h4>Version 1</h4>2. Scope. It applies to all staff, contractors, and third-party vendors.</div><div class='cell'><h4>Version 2</h4>2. Scope. It applies to all staff, contractors, and third-party vendors.</div></div><div class='row changed'><div class='status'>changed</div><div class='cell'><h4>Version 1</h4>3. Approved tools. Staff may use only AI tools approved by the AI Governance Committee.</div><div class='cell'><h4>Version 2</h4>3. Approved tools. Staff may use only AI tools approved by the AI Governance Committee, and must re-confirm approval annually.</div></div><div class='row changed'><div class='status'>changed</div><div class='cell'><h4>Version 1</h4>4. Data. Confidential data must not be entered into external AI tools.</div><div class='cell'><h4>Version 2</h4>4. Data. Confidential data must not be entered into external AI tools. Personal data may be processed only in approved environments.</div></div><div class='row changed'><div class='status'>changed</div><div class='cell'><h4>Version 1</h4>5. Human review. Outputs used in customer decisions must be reviewed by a qualified human.</div><div class='cell'><h4>Version 2</h4>5. Human review. Outputs used in customer decisions must be reviewed by a qualified human, and the review must be recorded.</div></div><div class='row changed'><div class='status'>changed</div><div class='cell'><h4>Version 1</h4>6. Monitoring. High-risk AI use cases must have a monitoring plan and a named owner.</div><div class='cell'><h4>Version 2</h4>6. Monitoring. High-risk AI use cases must have a monitoring plan, a named owner, and a quarterly review.</div></div><div class='row unchanged'><div class='status'>unchanged</div><div class='cell'><h4>Version 1</h4>7. Incidents. AI incidents must be reported to the AI Governance Committee within 24 hours.</div><div class='cell'><h4>Version 2</h4>7. Incidents. AI incidents must be reported to the AI Governance Committee within 24 hours.</div></div><div class='row added'><div class='status'>added</div><div class='cell'><h4>Version 1</h4><span style='color:#9ca3af'>(none)</span></div><div class='cell'><h4>Version 2</h4>8. Training. All staff must complete annual AI awareness training.</div></div><div class='row unchanged'><div class='status'>unchanged</div><div class='cell'><h4>Version 1</h4>9. Review. This policy is reviewed every twelve months.</div><div class='cell'><h4>Version 2</h4>9. Review. This policy is reviewed every twelve months.</div></div><div class='row removed'><div class='status'>removed</div><div class='cell'><h4>Version 1</h4>8. Exceptions. Exceptions to this policy must be approved in writing by the Chief Risk Officer.</div><div class='cell'><h4>Version 2</h4><span style='color:#9ca3af'>(none)</span></div></div>
+</main>
+</body>
+</html>

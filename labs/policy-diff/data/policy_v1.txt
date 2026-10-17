@@ -1,0 +1,9 @@
+1. Purpose. This policy sets the minimum requirements for using AI tools in the bank.
+2. Scope. It applies to all staff, contractors, and third-party vendors.
+3. Approved tools. Staff may use only AI tools approved by the AI Governance Committee.
+4. Data. Confidential data must not be entered into external AI tools.
+5. Human review. Outputs used in customer decisions must be reviewed by a qualified human.
+6. Monitoring. High-risk AI use cases must have a monitoring plan and a named owner.
+7. Incidents. AI incidents must be reported to the AI Governance Committee within 24 hours.
+8. Exceptions. Exceptions to this policy must be approved in writing by the Chief Risk Officer.
+9. Review. This policy is reviewed every twelve months.

@@ -164,7 +164,7 @@ After running, open `output/portfolio.html` for the dashboard, or `output/portfo
 - Add a data-lineage field and trace each use case to its approved source.
 - Add portfolio-level views (risk concentration, value by business unit).
 - Export to a governance register (AI inventory) format.
-- Add an embeddings-based similarity check to spot duplicate use cases.
+- Extend the duplicate detector to propose merges, not just clusters.
 
 ---
 
@@ -177,6 +177,18 @@ After running, open `output/portfolio.html` for the dashboard, or `output/portfo
 ## Decks
 
 `deck/ai-use-case-portfolio-A.pptx` is the portfolio and recruiter deck. `deck/ai-use-case-portfolio-C.pptx` is the technical walkthrough. Both are committed with PDF versions for viewing.
+
+---
+
+## Labs
+
+Smaller builds that explore the same ideas:
+
+- `labs/duplicate-detector`: embeds use case descriptions and clusters near-duplicates, using local embeddings or a token fallback.
+- `labs/policy-diff`: compares two versions of a policy clause by clause and labels added, removed, changed, and unchanged.
+- `labs/ontology-explorer`: a self-contained HTML page for clicking around the ontology.
+
+Each has its own README.
 
 ---
 

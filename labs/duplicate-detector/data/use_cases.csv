@@ -1,0 +1,15 @@
+id,name,description
+1,Policy Q&A Assistant,Answer internal policy questions with citations.
+2,Internal Policy Chatbot,Answer questions about internal policies and cite the source.
+3,Ask Policy Documents,Let staff ask questions about policy documents.
+4,KYC Document Extraction,Extract fields from onboarding documents.
+5,Onboarding Document Extraction,Pull customer fields from KYC onboarding paperwork.
+6,Complaint Triage,Classify and route customer complaints.
+7,Customer Complaint Routing,Sort incoming complaints by topic and send to the right team.
+8,Credit Memo Summarizer,Summarise credit memos for reviewers.
+9,Credit Memo Summary,Condense credit memos into a short reviewer brief.
+10,Churn Forecasting,Predict which customers will leave.
+11,Customer Churn Prediction,Forecast customer attrition.
+12,Meeting Notes to Actions,Turn meeting transcripts into action items.
+13,Regulatory Change Monitor,Track regulatory changes and map them to policy.
+14,Contract Clause Extraction,Extract key clauses from vendor contracts.

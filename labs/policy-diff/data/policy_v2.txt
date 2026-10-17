@@ -1,0 +1,9 @@
+1. Purpose. This policy sets the minimum requirements for using AI tools across the group.
+2. Scope. It applies to all staff, contractors, and third-party vendors.
+3. Approved tools. Staff may use only AI tools approved by the AI Governance Committee, and must re-confirm approval annually.
+4. Data. Confidential data must not be entered into external AI tools. Personal data may be processed only in approved environments.
+5. Human review. Outputs used in customer decisions must be reviewed by a qualified human, and the review must be recorded.
+6. Monitoring. High-risk AI use cases must have a monitoring plan, a named owner, and a quarterly review.
+7. Incidents. AI incidents must be reported to the AI Governance Committee within 24 hours.
+8. Training. All staff must complete annual AI awareness training.
+9. Review. This policy is reviewed every twelve months.
