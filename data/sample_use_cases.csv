@@ -1,0 +1,13 @@
+id,name,description,business_unit,owner,data_sources,ai_type,risk_tier,value,feasibility,data_readiness,effort_weeks,human_in_loop,monitoring
+UC-001,Policy Q&A Assistant,Answer internal policy questions with citations.,Compliance,Aisyah Rahman,policy_repository,RAG,1,5,5,5,6,yes,yes
+UC-002,KYC Document Extraction,Extract fields from onboarding documents.,Financial Crime,Daniel Tan,core_banking;document_management,Extraction,3,5,4,4,10,yes,yes
+UC-003,Complaint Triage,Classify and route customer complaints to the right team.,Customer Experience,Priya Nair,crm;call_transcripts,Classification,2,4,4,3,8,yes,yes
+UC-004,Credit Memo Summarizer,Summarise credit memos for reviewer preparation.,Risk,TBD,loan_documents,Summarisation,3,4,4,3,8,yes,no
+UC-005,AML Alert Narrative,Draft first-pass narratives for anti-money-laundering alerts.,Financial Crime,Wei Ling,core_banking;public_data,Generation,4,4,3,3,16,yes,yes
+UC-006,Customer Service Agent Assist,Offer real-time suggestions to call centre agents.,Operations,Ravi Kumar,call_transcripts,RAG,2,4,5,4,12,yes,yes
+UC-007,Churn Forecasting,Predict which customers are likely to leave.,Marketing,Sarah Lim,crm,Forecasting,2,3,4,5,14,no,yes
+UC-008,Regulatory Change Monitor,Track regulatory changes and map them to internal policy.,Compliance,Aisyah Rahman,public_data;policy_repository,RAG,2,4,4,4,10,yes,yes
+UC-009,Contract Clause Extraction,Extract key clauses from vendor contracts.,Legal,TBD,document_management,Extraction,3,3,4,3,12,yes,yes
+UC-010,Internal Knowledge Search,Natural language search across internal documents.,Enterprise IT,Daniel Tan,document_management;public_data,RAG,1,4,5,4,8,yes,yes
+UC-011,Meeting Notes to Actions,Turn meeting transcripts into action items.,Operations,Ravi Kumar,call_transcripts,Generation,2,2,5,5,4,yes,yes
+UC-012,Customer Sentiment Dashboard,Visualise sentiment trends across channels.,Customer Experience,Priya Nair,crm;call_transcripts,Classification,2,2,3,2,20,yes,yes

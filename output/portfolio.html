@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Use Case Portfolio</title>
+<style>
+:root { --navy:#0F1E46; --ice:#CADCFC; --amber:#F2A900; --teal:#0E8A7D; --paper:#f7f9fc; --ink:#111827; --muted:#6b7280; }
+* { box-sizing:border-box; }
+body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; background:var(--paper); color:var(--ink); }
+header.top { background:var(--navy); color:#fff; padding:28px 32px; }
+header.top h1 { margin:0 0 6px; font-size:24px; letter-spacing:.2px; }
+header.top p { margin:0; color:var(--ice); font-size:14px; }
+.board { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; padding:24px 32px 40px; align-items:start; }
+.col header { display:flex; justify-content:space-between; align-items:baseline; margin:0 0 10px; }
+.col h2 { font-size:15px; text-transform:uppercase; letter-spacing:.8px; color:var(--navy); margin:0; }
+.count { background:var(--navy); color:#fff; border-radius:999px; padding:2px 9px; font-size:12px; }
+.card { background:#fff; border:1px solid #e5e7eb; border-left:4px solid var(--teal); border-radius:10px; padding:14px; margin-bottom:12px; box-shadow:0 1px 2px rgba(16,24,40,.04); }
+.card-top { display:flex; justify-content:space-between; align-items:center; }
+.pill { font-size:11px; font-weight:600; padding:2px 8px; border-radius:999px; background:#eef2f7; color:var(--navy); }
+.risk-3 { background:#fef3c7; color:#92400e; }
+.risk-4 { background:#fee2e2; color:#991b1b; }
+.score { font-weight:700; color:var(--navy); }
+.card h3 { font-size:14px; margin:8px 0 4px; }
+.meta { font-size:12px; color:var(--muted); margin:0 0 6px; }
+.desc { font-size:12.5px; color:#374151; margin:0 0 6px; }
+.gaps { font-size:12px; color:#991b1b; background:#fef2f2; border-radius:6px; padding:6px 8px; margin:6px 0 0; }
+.rationale { font-size:12px; color:#374151; font-style:italic; margin:6px 0 0; }
+.empty { color:var(--muted); font-size:13px; }
+footer { padding:0 32px 32px; color:var(--muted); font-size:12px; }
+@media (max-width:1100px) { .board { grid-template-columns:repeat(2,1fr); } }
+@media (max-width:640px) { .board { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>AI Use Case Portfolio</h1>
+  <p>AI Use Case Portfolio Ontology v0.1.0 &middot; triaged into Now / Next / Later / Hold</p>
+</header>
+<div class="board">
+<section class='col'><header><h2>Now</h2><span class='count'>5</span></header><article class='card'><div class='card-top'><span class='pill risk-1'>Risk 1</span><span class='score'>98.8</span></div><h3>Policy Q&A Assistant</h3><p class='meta'>Compliance &middot; RAG</p><p class='desc'>Answer internal policy questions with citations.</p></article><article class='card'><div class='card-top'><span class='pill risk-1'>Risk 1</span><span class='score'>85.5</span></div><h3>Internal Knowledge Search</h3><p class='meta'>Enterprise IT &middot; RAG</p><p class='desc'>Natural language search across internal documents.</p></article><article class='card'><div class='card-top'><span class='pill risk-3'>Risk 3</span><span class='score'>81.6</span></div><h3>KYC Document Extraction</h3><p class='meta'>Financial Crime &middot; Extraction</p><p class='desc'>Extract fields from onboarding documents.</p></article><article class='card'><div class='card-top'><span class='pill risk-2'>Risk 2</span><span class='score'>80.9</span></div><h3>Customer Service Agent Assist</h3><p class='meta'>Operations &middot; RAG</p><p class='desc'>Offer real-time suggestions to call centre agents.</p></article><article class='card'><div class='card-top'><span class='pill risk-2'>Risk 2</span><span class='score'>77.3</span></div><h3>Regulatory Change Monitor</h3><p class='meta'>Compliance &middot; RAG</p><p class='desc'>Track regulatory changes and map them to internal policy.</p></article></section><section class='col'><header><h2>Next</h2><span class='count'>4</span></header><article class='card'><div class='card-top'><span class='pill risk-2'>Risk 2</span><span class='score'>73.6</span></div><h3>Churn Forecasting</h3><p class='meta'>Marketing &middot; Forecasting</p><p class='desc'>Predict which customers are likely to leave.</p></article><article class='card'><div class='card-top'><span class='pill risk-2'>Risk 2</span><span class='score'>72.7</span></div><h3>Complaint Triage</h3><p class='meta'>Customer Experience &middot; Classification</p><p class='desc'>Classify and route customer complaints to the right team.</p></article><article class='card'><div class='card-top'><span class='pill risk-2'>Risk 2</span><span class='score'>71.5</span></div><h3>Meeting Notes to Actions</h3><p class='meta'>Operations &middot; Generation</p><p class='desc'>Turn meeting transcripts into action items.</p></article><article class='card'><div class='card-top'><span class='pill risk-4'>Risk 4</span><span class='score'>59.7</span></div><h3>AML Alert Narrative</h3><p class='meta'>Financial Crime &middot; Generation</p><p class='desc'>Draft first-pass narratives for anti-money-laundering alerts.</p></article></section><section class='col'><header><h2>Later</h2><span class='count'>1</span></header><article class='card'><div class='card-top'><span class='pill risk-2'>Risk 2</span><span class='score'>45.4</span></div><h3>Customer Sentiment Dashboard</h3><p class='meta'>Customer Experience &middot; Classification</p><p class='desc'>Visualise sentiment trends across channels.</p></article></section><section class='col'><header><h2>Hold</h2><span class='count'>2</span></header><article class='card'><div class='card-top'><span class='pill risk-3'>Risk 3</span><span class='score'>69.0</span></div><h3>Credit Memo Summarizer</h3><p class='meta'>Risk &middot; Summarisation</p><p class='desc'>Summarise credit memos for reviewer preparation.</p><p class='gaps'>Gaps: no named business owner; no monitoring plan; unapproved data source: loan_documents</p></article><article class='card'><div class='card-top'><span class='pill risk-3'>Risk 3</span><span class='score'>60.2</span></div><h3>Contract Clause Extraction</h3><p class='meta'>Legal &middot; Extraction</p><p class='desc'>Extract key clauses from vendor contracts.</p><p class='gaps'>Gaps: no named business owner</p></article></section>
+</div>
+<footer>Generated by the AI Use Case Portfolio Analyzer. Synthetic data. Scoring is a model, not a verdict.</footer>
+</body>
+</html>
