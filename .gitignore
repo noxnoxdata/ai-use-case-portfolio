@@ -7,3 +7,14 @@ __pycache__/
 
 # Local model output and scratch
 output/*.tmp
+
+# Secrets and credentials
+.env
+.env.*
+*.pem
+*.key
+*.p12
+
+# Internal-only artifacts (never publish)
+*internal*
+deck-B*
